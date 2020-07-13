@@ -17,12 +17,10 @@ public class Main {
         private final String password = "123456";
         private final static String filePath ="C:\\Users\\NTQ\\Downloads\\channel_member_only_mysql.csv";
         private final static String query = "select *\n" +
-                "                    from community_service.channel_member cm\n" +
-                "                    join community_service.channel c ON cm.channel_id = c.id \n" +
-                "                    INNER JOIN community_service.`member` m ON m.id = cm.member_id \n" +
-                "                    INNER JOIN community_service.community c2 ON c.community_id = c2.id \n" +
-                "              \t\t\n" +
-                "                    where (c2.user_service_tenant_id = ? and cm.channel_id = ? and m.external_reference_id = ? and cm.joined =?) ";
+                "                    from community_service.channel_member cm" +
+                "                    join community_service.channel c ON cm.channel_id = c.id " +
+                "                    INNER JOIN community_service.`member` m ON m.id = cm.member_id " +
+                "                    INNER JOIN community_service.community c2 ON c.community_id = c2.id where (c2.user_service_tenant_id = '3d3bfba37a' and cm.channel_id = 4408 and m.external_reference_id = '264431' and cm.joined ='1') ";
 
         /**
          * Connect to the PostgreSQL database
@@ -62,25 +60,21 @@ public class Main {
             }
            return "";
         }
-        private void generateReport() throws SQLException {
-            PreparedStatement statement = connect().prepareStatement(query);
+        private void generateQuery() throws SQLException {
             try (Scanner scanner = new Scanner(new File(filePath))) {
+                List<String> newQuery = new ArrayList<>();
                 while (scanner.hasNextLine()) {
                     String [] values = getRecordFromLine(scanner.nextLine()).split(",");
-                    statement.setString(1,values[0].trim());
-                    statement.setString(2,values[1].trim());
-                    statement.setString(3,values[2].trim());
-                    statement.setString(4,values[3].trim());
-                    System.out.println(statement.toString());
+                    newQuery.add(String.format("or (c2.user_service_tenant_id = '%s' and cm.channel_id = %s and m.external_reference_id = '%s' and cm.joined ='%s')",values[0],values[1],values[2],values[3]));
                 }
-
-            } catch (FileNotFoundException | SQLException e) {
+            } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
         }
+
         public static void main(String[] args) throws SQLException {
             Main app = new Main();
-            app.generateReport();
+            app.generateQuery();
         }
 
 }
